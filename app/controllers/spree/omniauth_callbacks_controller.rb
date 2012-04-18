@@ -52,10 +52,11 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     provides_callback_for provider[1].to_sym
   end
 
+  # When user clicks Cancel, or does not allow stuff
   def failure
-    puts "There as an error during Social Login INSIDE failure"
-    set_flash_message :alert, :failure, :kind => failed_strategy.name.to_s.humanize, :reason => failure_message
-    redirect_to spree.login_path
+    #set_flash_message :alert, :failure, :kind => failed_strategy.name.to_s.humanize, :reason => failure_message
+    #redirect_to spree.login_path
+    render 'spree/social/social_redirect', :layout => false
   end
 
   def passthru
