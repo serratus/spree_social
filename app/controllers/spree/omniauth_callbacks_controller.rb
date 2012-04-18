@@ -7,6 +7,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       class_eval %Q{
         def #{provider}
           if request.env["omniauth.error"].present?
+            puts "There as an error during Social Login INSIDE provider!"
             flash[:error] = t("devise.omniauth_callbacks.failure", :kind => auth_hash['provider'], :reason => t(:user_was_not_valid))
             redirect_back_or_default(root_url)
             return
@@ -52,6 +53,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   def failure
+    puts "There as an error during Social Login INSIDE failure"
     set_flash_message :alert, :failure, :kind => failed_strategy.name.to_s.humanize, :reason => failure_message
     redirect_to spree.login_path
   end
