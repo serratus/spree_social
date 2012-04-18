@@ -7,9 +7,8 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       class_eval %Q{
         def #{provider}
           if request.env["omniauth.error"].present?
-            puts "There as an error during Social Login INSIDE provider!"
             flash[:error] = t("devise.omniauth_callbacks.failure", :kind => auth_hash['provider'], :reason => t(:user_was_not_valid))
-            redirect_back_or_default(root_url)
+            render 'spree/social/social_redirect', :layout => false
             return
           end
 
@@ -29,11 +28,11 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
               flash[:notice] = "Signed in successfully."
               sign_in_and_redirect :user, user
             else
-              user.errors.clear
               session[:omniauth] = auth_hash.except('extra')
               flash[:notice] = t(:one_more_step, :kind => auth_hash['provider'].capitalize)
               flash[:error] = nil
               #redirect_to new_user_registration_url
+              # TODO: Distinguish between popup and non-popup
               @redirect_url = new_user_registration_url
               render 'spree/social/social_redirect', :layout => false
             end
