@@ -32,7 +32,7 @@ module SpreeSocial
       if auth_method.provider == provider
         key = auth_method.api_key
         secret = auth_method.api_secret
-        puts("[Spree Social] Loading #{auth_method.provider.capitalize} as authentication source")
+        #puts("[Spree Social] Loading #{auth_method.provider.capitalize} as authentication source")
       end
     end
     self.setup_key_for(provider.to_sym, key, secret)
@@ -40,7 +40,7 @@ module SpreeSocial
 
   def self.setup_key_for(provider, key, secret)
     Devise.setup do |config|
-      puts("Devise.setup: provider=#{provider}")
+      #puts("Devise.setup: provider=#{provider}")
       if provider == :facebook
         config.omniauth provider, key, secret, :scope => 'email,read_stream', :display => 'popup'
       else
