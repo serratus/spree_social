@@ -3,12 +3,13 @@ Spree::User.class_eval do
 
   devise :omniauthable
 
-  def apply_omniauth(omniauth)
+  def apply_omniauth(omniauth, authentication)
     if omniauth['provider'] == "facebook"
       self.email = omniauth['info']['email'] if email.blank?
     end
 
-    user_authentications.build(:provider => omniauth['provider'], :uid => omniauth['uid'])
+    #user_authentications.build(:provider => omniauth['provider'], :uid => omniauth['uid'])
+    user_authentications << authentication
   end
 
   def password_required?

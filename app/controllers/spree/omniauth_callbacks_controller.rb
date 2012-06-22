@@ -15,27 +15,32 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
           authentication = Spree::UserAuthentication.find_by_provider_and_uid(auth_hash['provider'], auth_hash['uid'])
 
           if !authentication.nil?
-            flash[:notice] = "Signed in successfully"
-            sign_in_and_redirect :user, authentication.user
+            if !authentication.user.nil?
+              flash[:notice] = "Signed in successfully"
+              sign_in_and_redirect :user, authentication.user
+            else
+              user = Spree::User.new
+              user.apply_omniauth(auth_hash, authentication)
+              if user.save
+                flash[:notice] = "Signed in successfully."
+                sign_in_and_redirect :user, user
+              else
+                session[:omniauth] = auth_hash.except('extra')
+                flash[:notice] = t(:one_more_step, :kind => auth_hash['provider'].capitalize)
+                flash[:error] = nil
+                #redirect_to new_user_registration_url
+                # TODO: Distinguish between popup and non-popup
+                @redirect_url = new_user_registration_url
+                render 'spree/social/social_redirect', :layout => false
+              end
+            end
           elsif current_user
             current_user.user_authentications.create!(:provider => auth_hash['provider'], :uid => auth_hash['uid'])
             flash[:notice] = "Authentication successful."
             redirect_back_or_default(account_url)
           else
-            user = Spree::User.new
-            user.apply_omniauth(auth_hash)
-            if user.save
-              flash[:notice] = "Signed in successfully."
-              sign_in_and_redirect :user, user
-            else
-              session[:omniauth] = auth_hash.except('extra')
-              flash[:notice] = t(:one_more_step, :kind => auth_hash['provider'].capitalize)
-              flash[:error] = nil
-              #redirect_to new_user_registration_url
-              # TODO: Distinguish between popup and non-popup
-              @redirect_url = new_user_registration_url
-              render 'spree/social/social_redirect', :layout => false
-            end
+            @redirect_url = session[:return_to] || spree.login_url
+            render 'spree/social/social_redirect', :layout => false
           end
 
           if current_order
