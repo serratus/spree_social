@@ -40,14 +40,14 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
             redirect_back_or_default(account_url)
           else
             @redirect_url = session[:return_to] || spree.login_url
-            render 'spree/social/social_redirect', :layout => false
+            render 'spree/social/social_redirect', :layout => false 
           end
 
-          if current_order
-            user = current_user if current_user
-            current_order.associate_user!(user)
-            session[:guest_token] = nil
-          end
+          #if current_order
+          #  user = current_user if current_user
+          #  current_order.associate_user!(user)
+          #  session[:guest_token] = nil
+          #end
         end
       }
     end
