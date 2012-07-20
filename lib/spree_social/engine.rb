@@ -2,7 +2,7 @@ module SpreeSocial
   OAUTH_PROVIDERS = [
     ["Facebook", "facebook"],
     ["Twitter", "twitter"],
-    ["Github", "github"]
+    ["Dwolla", "dwolla"]
   ]
 
   class Engine < Rails::Engine
