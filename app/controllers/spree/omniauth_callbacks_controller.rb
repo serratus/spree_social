@@ -60,7 +60,8 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   # When user clicks Cancel, or does not allow stuff
   def failure
     session[:return_to] ||= request.referer
-    #set_flash_message :alert, :failure, :kind => failed_strategy.name.to_s.humanize, :reason => failure_message
+    set_flash_message :alert, :failure, :kind => failed_strategy.name.to_s.humanize, :reason => failure_message
+    logger.debug "Strategy: #{failed_strategy.name.to_s.humanize} failed with reason: #{failure_message}"
     #redirect_to spree.login_path
     @redirect_url = session[:return_to] || spree.login_url
     render 'spree/social/social_redirect', :layout => false
