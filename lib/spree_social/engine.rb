@@ -43,6 +43,8 @@ module SpreeSocial
       #puts("Devise.setup: provider=#{provider}")
       if provider == :facebook
         config.omniauth provider, key, secret, :scope => 'email,read_stream', :display => 'popup'
+      elsif provider == :dwolla
+        config.omniauth provider, key, secret, :scope => 'Send,AccountInfoFull,Request,Balance'
       else
         config.omniauth provider, key, secret
       end
