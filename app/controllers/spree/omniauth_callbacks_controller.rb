@@ -11,43 +11,52 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
             render 'spree/social/social_redirect', :layout => false
             return
           end
-
+          
+          # find authentications
           authentication = Spree::UserAuthentication.find_by_provider_and_uid(auth_hash['provider'], auth_hash['uid'])
 
-          if !authentication.nil?
-            if !authentication.user.nil?
-              flash[:notice] = "Signed in successfully"
-              sign_in_and_redirect :user, authentication.user
-            else
-              user = Spree::User.new
-              user.apply_omniauth(auth_hash, authentication)
-              if user.save
-                flash[:notice] = "Signed in successfully."
-                sign_in_and_redirect :user, user
-              else
+          if auth_hash['provider'] == 'facebook'
+            if !authentication.nil? || !SpreeClay::Config[:pre_auth_required]
+              if !authentication.user.nil? # already signed up
+                flash[:notice] = "Signed in successfully"
+                sign_in :user, authentication.user
+                @redirect_url = session[:return_to] || root_url
+                render 'spree/social/social_redirect', :layout => false
+                return
+              else # not yet signed up
+                user = Spree::User.new 
+                user.apply_omniauth(auth_hash, authentication)
+
                 session[:omniauth] = auth_hash.except('extra')
                 flash[:notice] = t(:one_more_step, :kind => auth_hash['provider'].capitalize)
                 flash[:error] = nil
-                #redirect_to new_user_registration_url
-                # TODO: Distinguish between popup and non-popup
                 @redirect_url = new_user_registration_url
                 render 'spree/social/social_redirect', :layout => false
+                return
               end
+            else
+              flash[:notice] = "This is a private beta, please stand by"
+              @redirect_url = spree.root_url
+              render 'spree/social/social_redirect', :layout => false
+              return
             end
-          elsif current_user
-            current_user.user_authentications.create!(:provider => auth_hash['provider'], :uid => auth_hash['uid'])
-            flash[:notice] = "Authentication successful."
-            redirect_back_or_default(account_url)
           else
-            @redirect_url = session[:return_to] || spree.login_url
-            render 'spree/social/social_redirect', :layout => false 
+            if current_user # if user is alrady part of clay
+               current_user.user_authentications.create!({
+                :provider => auth_hash['provider'], 
+                :uid => auth_hash['uid'],
+                :auth_token => auth_hash['credentials']['token'],
+                :expires_at => Time.at(auth_hash['credentials']['expires_at']),
+                :expires => true})
+              flash[:notice] = "Authentication successful."
+              @redirect_url = account_url
+              render 'spree/social/social_redirect', :layout => false
+              return
+            end
           end
-
-          #if current_order
-          #  user = current_user if current_user
-          #  current_order.associate_user!(user)
-          #  session[:guest_token] = nil
-          #end
+          
+          @redirect_url = session[:return_to] || spree.login_url
+          render 'spree/social/social_redirect', :layout => false 
         end
       }
     end
