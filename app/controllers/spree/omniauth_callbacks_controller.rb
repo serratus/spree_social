@@ -42,11 +42,12 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
             end
           else
             if current_user # if user is alrady part of clay
+              expires_at = auth_hash['credentials']['expires_at'] ? Time.at(auth_hash['credentials']['expires_at']) : Time.now.next_year
                current_user.user_authentications.create!({
                 :provider => auth_hash['provider'], 
                 :uid => auth_hash['uid'],
                 :auth_token => auth_hash['credentials']['token'],
-                :expires_at => Time.at(auth_hash['credentials']['expires_at']),
+                :expires_at => expires_at,
                 :expires => true})
               flash[:notice] = "Authentication successful."
               @redirect_url = account_url
