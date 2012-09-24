@@ -17,9 +17,10 @@ Gem::Specification.new do |s|
   s.add_dependency 'spree_core'
   s.add_dependency 'spree_auth'
   s.add_dependency 'omniauth'
+  s.add_dependency 'omniauth-oauth2', '1.0.2'
   s.add_dependency 'oa-core'
   s.add_dependency 'omniauth-twitter'
-  s.add_dependency 'omniauth-facebook'
+  s.add_dependency 'omniauth-facebook', '1.4.0'
   s.add_dependency 'omniauth-instagram'
 
   s.add_development_dependency 'capybara', '1.0.1'
