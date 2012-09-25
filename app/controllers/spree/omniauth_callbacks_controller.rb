@@ -52,15 +52,19 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
                 :expires_at => expires_at,
                 :expires => true})
               flash[:notice] = "Authentication successful."
-              redirect_back_or_default(root_path)
+              redirect_to "/settings/account/edit"
               return
             else
               Rails.logger.info "not current user"
             end
           end
           
-          @redirect_url = session[:return_to] || spree.login_url
-          render 'spree/social/social_redirect', :layout => false 
+          #@redirect_url = session[:return_to] || spree.login_url
+          #render 'spree/social/social_redirect', :layout => false 
+          
+          #redirect_back_or_default(root_path)
+          flash[:notice] = "Finished Callback"
+          redirect_to "/settings/account/edit"
         end
       }
     end
