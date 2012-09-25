@@ -9,7 +9,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
           if request.env["omniauth.error"].present?
             Rails.logger.info "omniauth.error"
             flash[:error] = t("devise.omniauth_callbacks.failure", :kind => auth_hash['provider'], :reason => t(:user_was_not_valid))
-            render 'spree/social/social_redirect', :layout => false
+            redirect_to "/settings/account/edit"
             return
           end
           
@@ -37,8 +37,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
               end
             else
               flash[:notice] = "This is a private beta, please stand by"
-              @redirect_url = spree.root_url
-              render 'spree/social/social_redirect', :layout => false
+              redirect_to "/settings/account/edit"
               return
             end
           else
@@ -59,10 +58,6 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
             end
           end
           
-          #@redirect_url = session[:return_to] || spree.login_url
-          #render 'spree/social/social_redirect', :layout => false 
-          
-          #redirect_back_or_default(root_path)
           flash[:notice] = "Finished Callback"
           redirect_to "/settings/account/edit"
         end
