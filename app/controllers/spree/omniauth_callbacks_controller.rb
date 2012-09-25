@@ -7,6 +7,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       class_eval %Q{
         def #{provider}
           if request.env["omniauth.error"].present?
+            Rails.logger.info "omniauth.error"
             flash[:error] = t("devise.omniauth_callbacks.failure", :kind => auth_hash['provider'], :reason => t(:user_was_not_valid))
             render 'spree/social/social_redirect', :layout => false
             return
@@ -41,7 +42,8 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
               return
             end
           else
-            if current_user # if user is alrady part of clay
+            if current_user && authentication.nil?# if user is alrady part of clay
+              Rails.logger.info "current user"
               expires_at = auth_hash['credentials']['expires_at'] ? Time.at(auth_hash['credentials']['expires_at']) : Time.now.next_year
                current_user.user_authentications.create!({
                 :provider => auth_hash['provider'], 
@@ -50,9 +52,10 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
                 :expires_at => expires_at,
                 :expires => true})
               flash[:notice] = "Authentication successful."
-              @redirect_url = account_url
-              render 'spree/social/social_redirect', :layout => false
+              redirect_back_or_default(root_path)
               return
+            else
+              Rails.logger.info "not current user"
             end
           end
           
