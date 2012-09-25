@@ -7,7 +7,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       class_eval %Q{
         def #{provider}
           if request.env["omniauth.error"].present?
-            Rails.logger.info "omniauth.error"
+            puts "omniauth.error"
             flash[:error] = t("devise.omniauth_callbacks.failure", :kind => auth_hash['provider'], :reason => t(:user_was_not_valid))
             redirect_to "/settings/account/edit"
             return
@@ -36,6 +36,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
                 return
               end
             else
+              puts "Private Beta"
               flash[:notice] = "This is a private beta, please stand by"
               redirect_to "/settings/account/edit"
               return
@@ -50,14 +51,15 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
                 :auth_token => auth_hash['credentials']['token'],
                 :expires_at => expires_at,
                 :expires => true})
+                puts "Authentication successful"
               flash[:notice] = "Authentication successful."
               redirect_to "/settings/account/edit"
               return
             else
-              Rails.logger.info "not current user"
+              puts "not current user"
             end
           end
-          
+          puts "Callback Finished"
           flash[:notice] = "Finished Callback"
           redirect_to "/settings/account/edit"
         end
@@ -71,12 +73,18 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 
   # When user clicks Cancel, or does not allow stuff
   def failure
+    puts "Failure"
     session[:return_to] ||= request.referer
     set_flash_message :alert, :failure, :kind => failed_strategy.name.to_s.humanize, :reason => failure_message
     logger.debug "Strategy: #{failed_strategy.name.to_s.humanize} failed with reason: #{failure_message}"
-    #redirect_to spree.login_path
-    @redirect_url = session[:return_to] || spree.login_url
-    render 'spree/social/social_redirect', :layout => false
+    if current_user
+      redirect_to "/settings/account/edit"
+    else
+      redirect_to spree.login_path
+    end
+    
+    #@redirect_url = session[:return_to] || spree.login_url
+    #render 'spree/social/social_redirect', :layout => false
   end
 
   def passthru
