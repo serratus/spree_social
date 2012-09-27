@@ -19,7 +19,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
           authentication = Spree::UserAuthentication.find_by_provider_and_uid(auth_hash['provider'], auth_hash['uid'])
 
           if auth_hash['provider'] == 'facebook'
-            if !authentication.nil? || !SpreeClay::Config[:pre_auth_required]
+            if !authentication.nil? || !Clay::Config[:pre_auth_required]
               if !authentication.user.nil? # already signed up
                 flash[:notice] = "Signed in successfully"
                 sign_in :user, authentication.user
