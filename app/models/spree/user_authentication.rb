@@ -8,10 +8,10 @@ class Spree::UserAuthentication < ActiveRecord::Base
   end)
   
   def self.facebook
-    where(provider: "facebook").active.first
+    where(provider: "facebook").active
   end
   
   def self.instagram
-    where(provider: "instagram").active.first
+    where(provider: "instagram").active
   end
 end

@@ -44,7 +44,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
               return
             end
           else
-            if current_user && authentication.nil?# if user is alrady part of clay
+            if current_user && (authentication.nil? || authentication.user_id != current_user.id)# if user is alrady part of clay
               Rails.logger.info "current user"
               expires_at = auth_hash['credentials']['expires_at'] ? Time.at(auth_hash['credentials']['expires_at']) : Time.now.next_year
                current_user.user_authentications.create!({
