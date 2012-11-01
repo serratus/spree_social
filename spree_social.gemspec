@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'omniauth-twitter'
   s.add_dependency 'omniauth-facebook', '1.4.0'
   s.add_dependency 'omniauth-instagram'
+  s.add_dependency 'omniauth-dwolla'
 
   s.add_development_dependency 'capybara', '1.0.1'
   s.add_development_dependency 'factory_girl'

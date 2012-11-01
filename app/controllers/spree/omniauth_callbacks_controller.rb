@@ -11,7 +11,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
           if request.env["omniauth.error"].present?
             puts "omniauth.error"
             flash[:error] = t("devise.omniauth_callbacks.failure", :kind => auth_hash['provider'], :reason => t(:user_was_not_valid))
-            redirect_to "/settings/account/edit"
+            respond_social(false)
             return
           end
           
@@ -23,8 +23,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
               if !authentication.user.nil? # already signed up
                 flash[:notice] = "Signed in successfully"
                 sign_in :user, authentication.user
-                @redirect_url = session[:return_to] || root_url
-                render 'spree/social/social_redirect', :layout => false
+                respond_social
                 return
               else # not yet signed up
                 user = Spree::User.new 
@@ -34,13 +33,13 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
                 flash[:notice] = t(:one_more_step, :kind => auth_hash['provider'].capitalize)
                 flash[:error] = nil
                 @redirect_url = new_user_registration_url
-                render 'spree/social/social_redirect', :layout => false
+                respond_social
                 return
               end
             else
               puts "Private Beta"
               flash[:notice] = "This is a private beta, please stand by"
-              redirect_to "/settings/account/edit"
+              respond_social
               return
             end
           else
@@ -55,7 +54,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
                 :expires => true})
                 puts "Authentication successful"
               flash[:notice] = "Authentication successful."
-              redirect_to "/settings/account/edit"
+              respond_social
               return
             else
               puts "not current user"
@@ -63,7 +62,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
           end
           puts "Callback Finished"
           flash[:notice] = "Finished Callback"
-          redirect_to "/settings/account/edit"
+          respond_social
         end
       }
     end
@@ -79,21 +78,29 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
     session[:return_to] ||= request.referer
     set_flash_message :alert, :failure, :kind => failed_strategy.name.to_s.humanize, :reason => failure_message
     logger.debug "Strategy: #{failed_strategy.name.to_s.humanize} failed with reason: #{failure_message}"
-    if current_user
-      redirect_to "/settings/account/edit"
-    else
-      redirect_to spree.login_path
-    end
-    
+    respond_social(false)
     #@redirect_url = session[:return_to] || spree.login_url
     #render 'spree/social/social_redirect', :layout => false
   end
 
+  def respond_social(success=true)
+    @result = {provider: auth_hash['provider'], success: success}
+
+    @redirect_url ||= session[:return_to] || request.env['HTTP_REFERER'] || root_url
+    @result[:data] = @redirect_url
+    render 'spree/social/social_javascript', :layout => false
+  end
+
   def passthru
+    Rails.logger.debug "Passthru for #{params[:provider]}"
     render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => false
   end
 
   def auth_hash
     request.env["omniauth.auth"]
+  end
+  
+  def request_params
+    request.env['omniauth.params']
   end
 end
