@@ -86,7 +86,7 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   def respond_social(success=true)
     @result = {provider: auth_hash['provider'], success: success}
 
-    @redirect_url ||= session[:return_to] || request.env['HTTP_REFERER'] || root_url
+    @redirect_url ||= session[:return_to] || root_url
     @result[:data] = @redirect_url
     render 'spree/social/social_javascript', :layout => false
   end
