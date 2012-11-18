@@ -21,6 +21,12 @@ class Spree::OmniauthCallbacksController < Devise::OmniauthCallbacksController
           if auth_hash['provider'] == 'facebook'
             if !authentication.nil? || !Clay::Config[:pre_auth_required]
               if !authentication.user.nil? # already signed up
+                # TODO: update token
+                authentication.update_attributes({
+                  :auth_token => auth_hash['credentials']['token'],
+                  :expires_at => Time.at(auth_hash['credentials']['expires_at'])
+                })
+                
                 #flash[:notice] = "Signed in successfully"
                 sign_in :user, authentication.user
                 respond_social
